@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
 
 
 type Job = {
@@ -24,6 +25,9 @@ const fetchJobs = async (): Promise<Job[]> => {
 const updateJob = async (updatedJob: Job): Promise<Job> => {
   console.log('Sending update for job with id:', updatedJob.id);
   const response = await axios.put(`/api/jobs/${updatedJob.id}`, updatedJob);
+  if(response.data){
+    toast.success("Updated Successfully");
+  }
   return response.data;
 };
 
@@ -31,6 +35,9 @@ const deleteJob = async (job: Job): Promise<Job> => {
   const jobIdInt = parseInt(job.id, 10);
   console.log('Deleting job with id:', jobIdInt);
   const response = await axios.delete(`/api/jobs/${jobIdInt}`);
+  if(response.data){
+    toast.success("Deleted Successfully");
+  }
   return response.data;
 };
 

@@ -2,8 +2,21 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { z } from "zod";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+
+// Zod schema for validation
+const jobSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters long"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  category: z.string().min(3, "Category is required"),
+  location: z.string().min(3, "Location is required"),
+  salary: z.string().regex(/^\d+$/, "Salary must be a valid number"),
+});
 
 export default function AddJob() {
+    const router = useRouter();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -12,7 +25,8 @@ export default function AddJob() {
     salary: "",
   });
 
- 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const mutation = useMutation({
     mutationFn: async (newJob: typeof formData) => {
       const response = await fetch("/api/jobs", {
@@ -28,8 +42,11 @@ export default function AddJob() {
       return response.json();
     },
     onSuccess: () => {
-      alert("Job posted successfully!");
+    toast.success("Job posted successfully!");
+    router.push("/AdminDashboard");
       setFormData({ title: "", description: "", category: "", location: "", salary: "" });
+      setErrors({});
+
     },
     onError: (error) => {
       console.error(error);
@@ -39,10 +56,37 @@ export default function AddJob() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    // Validate single field on change
+    const fieldName = e.target.name as keyof typeof formData;
+    if (jobSchema.shape[fieldName]) {
+      try {
+        jobSchema.shape[fieldName].parse(e.target.value);
+        setErrors((prevErrors) => ({ ...prevErrors, [fieldName]: "" }));
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          setErrors((prevErrors) => ({ ...prevErrors, [fieldName]: err.errors[0].message }));
+        }
+      }
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate full form
+    const validationResult = jobSchema.safeParse(formData);
+    if (!validationResult.success) {
+      const fieldErrors: Record<string, string> = {};
+      validationResult.error.issues.forEach(issue => {
+        if (issue.path[0]) {
+          fieldErrors[issue.path[0]] = issue.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     mutation.mutate(formData);
   };
 
@@ -50,54 +94,24 @@ export default function AddJob() {
     <div className="max-w-lg mx-auto p-4 bg-white shadow-md rounded-lg mt-10">
       <h2 className="text-xl font-semibold mb-4">Add New Job</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Job Title"
-          className="w-full p-2 border rounded"
-          required
-        />
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Job Description"
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="text"
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          placeholder="Category"
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="text"
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          placeholder="Location"
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="number"
-          name="salary"
-          value={formData.salary}
-          onChange={handleChange}
-          placeholder="Salary"
-          className="w-full p-2 border rounded"
-          required
-        />
+        {["title", "description", "category", "location", "salary"].map((field) => (
+          <div key={field}>
+            <input
+              type={field === "salary" ? "number" : "text"}
+              name={field}
+              value={formData[field as keyof typeof formData]}
+              onChange={handleChange}
+              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+              className="w-full p-2 border rounded"
+              required
+            />
+            {errors[field] && <p className="text-red-500 text-sm">{errors[field]}</p>}
+          </div>
+        ))}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white p-2 rounded"
-          disabled={mutation.status === "pending"} // Alternative: mutation.isPending
+          disabled={mutation.status === "pending"}
         >
           {mutation.status === "pending" ? "Submitting..." : "Submit"}
         </button>

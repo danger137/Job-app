@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
+import { toast } from "react-toastify";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -23,8 +24,8 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
-
-      console.log(data);
+toast.success("Login Successfull");
+     
       localStorage.setItem("user", JSON.stringify(data.user));
 
       if (data.user.role === "admin") {

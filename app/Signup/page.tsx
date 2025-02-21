@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
+import { toast } from "react-toastify";
 
 
 const signupSchema = z.object({
@@ -30,8 +31,8 @@ export default function Signup() {
       return data;
     },
     onSuccess: () => {
-      alert("Signup successful! Redirecting...");
-      setTimeout(() => (window.location.href = "/Login"), 2000); // Redirect to login page
+      toast.success("Signup successful!")
+      setTimeout(() => (window.location.href = "/Login"), 2000); 
     },
     onError: (error: any) => {
       alert(error.message);
