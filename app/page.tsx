@@ -6,6 +6,8 @@ export default ()=> {
   return (
 <div>
 <Home></Home>
+
+
 </div>
   );
 }

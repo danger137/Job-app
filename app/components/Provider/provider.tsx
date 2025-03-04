@@ -47,7 +47,7 @@ const ReactQueryProvider = ({ children }: { children: ReactNode }) => {
       }}
     >
       {children}
-  <ReactQueryDevtools></ReactQueryDevtools>
+  {/* <ReactQueryDevtools></ReactQueryDevtools> */}
     </PersistQueryClientProvider>
   );
 };

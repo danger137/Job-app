@@ -42,5 +42,17 @@ model Application {
   user      User     @relation(fields: [userId], references: [id])  
 }
 
+model Message {
+  id        Int       @id @default(autoincrement())  
+  text       String
+  fileUrl    String?   // Optional file URL
+  name       String
+  Senderid   Int
+  Recieverid Int
+  Seen       Boolean  
+  createdAt  DateTime @default(now())
+}
+
+
 
 

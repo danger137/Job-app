@@ -33,6 +33,7 @@ export default function RootLayout({
           <ReactQueryProvider>
         <Header></Header>
         {children}
+  
         </ReactQueryProvider>
         <ToastContainer />
       </body>
