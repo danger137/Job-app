@@ -63,24 +63,24 @@ const HomePage = () => {
       let service = await fetchFetures();
       let service2 = await fetchFetures2();
   
-      // Ensure service matches ServiceType
+    
       const formattedService: ServiceType[] = service.map((item: any) => ({
         title:
           typeof item.title === "string" ||
           typeof item.title === "number" ||
           typeof item.title === "boolean"
             ? String(item.title)
-            : "Untitled", // Default value if title is missing
+            : "Untitled", 
         description: typeof item.description === "string" ? item.description : "",
         emoji: typeof item.emoji === "string" ? item.emoji : "😊", // Default emoji
         tags: Array.isArray(item.tags) ? item.tags : [], // Ensure tags is an array
       }));
   
-      // Ensure service2 matches ServiceType
+
       const formattedService2: ServiceType[] = service2.map((item: any) => ({
-        title: "No Title", // Since service2 doesn't have title, use a placeholder
+        title: "No Title", 
         description: typeof item.description === "string" ? item.description : "",
-        emoji: "📌", // Placeholder emoji
+        emoji: "📌",
         tags: Array.isArray(item.tags) ? item.tags : [], // Ensure tags is an array
       }));
   
